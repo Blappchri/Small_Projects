@@ -1,0 +1,350 @@
+---
+title: "Hankolympics"
+format: html
+editor: visual
+---
+
+## Introdution
+
+Context: Hank video
+
+Question: Why Europe love Bronze
+
+Dataset: Grabbed from TidyTuesday to make things easy
+
+add general sums somwhere to show overincidence of bronze
+
+mention jobless enery surplus for sleuthing
+
+## Present Question
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidytuesdayR)
+library(ggsankey)
+
+data <- tidytuesdayR::tt_load('2024-08-06')
+data<-data$olympics
+
+#grab below from wikipedia, RUS and soviet removed because they arent that europe-ish
+codes_EU<-"ALB,AND,ARM,AUT,AZE,BEL,BIH,BLR,BUL,CRO,CYP,CZE,DEN,ESP,EST,FIN,FRA,GBR,GEO,GER,GRE,HUN,IRL,ISL,ISR,ITA,KOS,LAT,LIE,LTU,LUX,MDA,MKD,MLT,MNE,MON,NED,NOR,POL,POR,ROU,SLO,SMR,SRB,SUI,SVK,SWE,TUR,UKR,TCH,GDR,SCG,YUG"%>%
+  strsplit(",")%>%
+  unlist()
+
+europe_sums<-data%>%
+  filter(grepl("Summer",games))%>%
+  filter(year>=1948)%>%
+  filter(noc%in%codes_EU)%>%
+  filter(!is.na(medal))%>%
+  distinct(noc,year,event,medal)%>%
+  group_by(year)%>%
+  summarize(
+    gold=sum(medal=="Gold"),
+    silver=sum(medal=="Silver"),
+    bronze=sum(medal=="Bronze")
+  )
+
+europe_sums%>%
+  mutate(
+    across(gold:bronze,~.x/(gold+silver+bronze))
+  )%>%
+  tidyr::pivot_longer(cols=gold:bronze)%>%
+  ggplot(
+    aes(x=year,y=value,col=name)
+    )+
+  geom_line()
+fix cols and make silver smaller
+```
+
+## Is it a Sum thing?
+
+```{r}
+hank_sums<-data%>%
+  filter(grepl("Summer",games))%>%
+  filter(year>=1948)%>%
+  filter(substr(noc,1,1)%in%c("H","A","N","K"))%>%
+  filter(!is.na(medal))%>%
+  distinct(noc,year,event,medal)%>%
+  group_by(year)%>%
+  summarize(
+    gold=sum(medal=="Gold"),
+    silver=sum(medal=="Silver"),
+    bronze=sum(medal=="Bronze")
+  )
+
+hank_sums%>%
+  mutate(
+    across(gold:bronze,~.x/(gold+silver+bronze))
+  )%>%
+  tidyr::pivot_longer(cols=gold:bronze)%>%
+  ggplot(
+    aes(x=year,y=value,col=name)
+    )+
+  geom_line()
+```
+
+## Who actually gets more Gold?
+
+```{r}
+all_sums<-data%>%
+  filter(year>=1948)%>%
+  filter(grepl("Summer",games))%>%
+  filter(!is.na(medal))%>%
+  distinct(noc,year,event,medal)%>%
+  group_by(year,noc)%>%
+  summarize(
+    gold=sum(medal=="Gold"),
+    silver=sum(medal=="Silver"),
+    bronze=sum(medal=="Bronze")
+  )%>%
+  ungroup()
+
+all_sums%>%
+  mutate(bmg=bronze-gold)%>%
+  mutate(cat=bmg<0)%>%
+  ggplot(aes(x=bmg))+
+  stat_ecdf()
+facet, but change direction
+```
+
+does europe lose against repeat winners?
+
+## 1st Idea: Repeat Winners
+
+do sankey
+
+Most countries don't produce bileses
+
+cultural attitude, money
+
+Things get dirtier
+
+```{r}
+group_events<-data%>%
+  filter(year>=1948)%>%
+  filter(grepl("Summer",games))%>%
+  filter(medal=="Gold")%>%
+  group_by(event,year)%>%
+  filter(n()!=1)%>%
+  group_by(event)%>%
+  summarize(
+    n_years=length(unique(year))
+  )%>%
+  ungroup()
+
+medal_first_year<-data%>%
+  filter(year>=1948)%>%
+  filter(grepl("Summer",games))%>%
+  filter(!event%in%group_events$event)%>%
+  group_by(noc,name,sport)%>%
+  filter(!is.na(medal))%>%
+  slice_min(year,n=1,with_ties = FALSE)%>%
+  ungroup()%>%
+  select(noc,name,sport,year_medal=year)
+
+medal_repeats<-data%>%
+  right_join(medal_first_year)%>%
+  filter(year>year_medal)%>%
+  group_by(name,sport,noc)%>%
+  summarize(
+    gold=sum(medal=="Gold"),
+    gold=case_when(
+      is.na(gold)~0,
+      TRUE~gold
+    ),
+    medal=sum(!is.na(medal)),
+    part=n()
+  )%>%
+  ungroup()%>%
+  right_join(
+    medal_first_year%>%
+      filter(year_medal!=2016)
+    )%>%
+  mutate(across(gold:part,~case_when(
+    is.na(.x)~0,
+    TRUE~.x
+  )))
+
+medal_repeats%>%#create better Viz, maybe per game just medals from previous winners
+  mutate(
+    group=case_when(
+      noc%in%codes_EU~"europe",
+      noc%in%c("USA","CHN", "URS")~"top",
+      TRUE~"rest"
+    )
+  )%>%
+  filter(group!="rest")%>%
+  #tidyr::pivot_longer(cols=gold:part,names_to = "cat")%>%
+  mutate(
+    legacy=case_when(
+      part==0~"No later appearance",
+      medal==0~"Appearance, no medal",
+      gold==0~"Medal(s), no gold",
+      TRUE~"More gold"
+    )%>%factor(levels = c("No later appearance","Appearance, no medal","Medal(s), no gold", "More gold"))
+  )%>%
+  group_by(group)%>%
+  mutate(
+    group_size=n(),
+  )%>%
+  group_by(group,legacy)%>%
+  summarize(prop=first(n()/group_size))%>%
+  ungroup()%>%
+  ggplot(aes(x=legacy,y=prop))+
+  geom_bar(stat="identity")+
+  facet_grid(cols=vars(group))
+
+also add gold as facet, put group as col and adj rather than facet
+```
+
+Number of repeat nonwinners actually crazy low for top
+
+former golds produce medals, not gold
+
+```{r}
+year_for_join<-data%>%
+  filter(year>=1948)%>%
+  filter(grepl("Summer",games))%>%
+  filter(!event%in%group_events$event)%>%
+  mutate(
+    group=case_when(
+      noc%in%codes_EU~"europe",
+      noc%in%c("USA","CHN", "URS")~"top",
+      TRUE~"rest"
+    )
+  )%>%
+  filter(group!="rest")%>%
+  mutate(
+    cat=case_when(
+      medal=="Gold"~"Gold",
+      !is.na(medal)~"Other Medal",
+      TRUE~"Participation"
+    )
+  )%>%
+  ungroup()%>%
+  mutate(year_join=year-4)%>%
+  select(noc,name,event,year,year_join,cat,group)
+
+for_sankey=year_for_join%>%
+  filter(year!=1948)%>%
+  filter(!(year==1988&noc=="URS"))%>%#boycott 1984
+  filter(!(year==1984&noc=="USA"))%>%#boycott 1980
+  full_join(
+    year_for_join%>%
+      filter(year!=2016)%>%
+      filter(!(year==1988&noc=="URS"))%>%#last one for them
+      filter(!(year==1980&noc=="URS"))%>%#boycott 1984
+      filter(!(year==1976&noc=="USA"))%>%#boycott 1980
+      select(-group,-year_join)%>%
+      rename(cat_next=cat),
+    by=c("noc","name","event","year_join"="year")
+  )%>%
+  mutate(
+    across(c(cat,cat_next),~case_when(
+      is.na(.x)~"Not there",
+      TRUE~.x
+    )%>%factor())
+  )%>%
+  mutate(
+    first=factor("This",levels=c("This","That")),
+    second=factor("That",levels=c("This","That"))
+  )
+
+for_sankey%>%
+  bind_rows(
+    for_sankey%>%
+      mutate(
+        first=second,
+        cat=cat_next,
+        second=NULL,
+        cat_next=NULL
+      )
+  )%>%
+  ggplot(aes(
+    x=first,
+    next_x=second,
+    node=cat,
+    next_node=cat_next,
+    fill=factor(cat)
+    ))+
+  geom_sankey()+
+  theme_sankey()
+
+sankey bad. heatmat instead
+```
+
+## 2nd Idea: The Peak is Political
+
+data from figure above, visualize who got had the best gold ratios over the years
+
+no mechanism to train athletes toward specifically being third-best
+
+General wealth gets you medal, but Gold needs something more special
+
+```{r}
+all_sums%>%
+  filter((gold+silver+bronze)>=10)%>%
+  mutate(
+    bmg=bronze-gold,
+    group=case_when(
+        noc=="USA"~"USA",
+        noc%in%c("RUS","URS","EUN")~"Soviet/Russia",
+        noc=="CHN"~"China",
+        noc%in%codes_EU~"Europe",
+        TRUE~"Rest"
+    )
+    )%>%
+  filter(-bmg>=3)%>%
+  ggplot(aes(x=bmg,y=year,col=group))+
+  geom_jitter(width = 0.3,height = 0.9)
+
+use vertical lines to visuals
+```
+
+## Look at 2024
+
+```{r}
+medals_2024 <- read.csv("~/Documents/Small_Projects/medals.csv")
+from kaggle
+medals_2024%>%
+  group_by(country_code)%>%
+  summarize(
+    gold=sum(medal_type=="Gold Medal"),
+    bronze=sum(medal_type=="Bronze Medal"),
+  )%>%
+  mutate(
+    diff=bronze-gold
+  )%>%
+  ggplot(aes(x=diff))+
+  stat_ecdf()
+```
+
+add age?
+
+```{r}
+age_data<-data%>%
+  filter(year>=1948)%>%
+  filter(!event%in%group_events$event)%>%
+  filter(grepl("Summer",games))%>%
+  transmute(
+    year=year,
+    group=case_when(
+      noc%in%codes_EU~"europe",
+      noc%in%c("USA","CHN", "URS")~"top",
+      TRUE~"rest"
+    ),
+    cat=case_when(
+      medal=="Gold"~"Gold",
+      !is.na(medal)~"Other Medal",
+      TRUE~"Participation"
+    ),
+    age=age
+  )%>%
+  filter(group!="rest")%>%
+  filter(!is.na(age))
+
+age_data%>%
+  ggplot(aes(x=age,col=cat))+
+  stat_ecdf()
+```
