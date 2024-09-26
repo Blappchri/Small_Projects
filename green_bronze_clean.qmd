@@ -3,14 +3,13 @@ title: " Green's Bronze Mystery"
 format: 
   closeread-html:
     backgroundcolor: "#FFFFE0"
-    fig-width: 8
 editor: visual
 ---
 
 ## The Start of our Story
 
-:::{.cr-section}
-:::{focus-on="cr-vid1"}
+::: cr-section
+::: {focus-on="cr-vid1"}
 Some weeks ago, right after the Paris Olympics had concluded, an influencer whose content I quite enjoy - Hank Green - released a video
 :::
 
@@ -18,18 +17,17 @@ Within the video he describes an interesting pattern he had noticed while lookin
 
 This European sum seems to have an over-representation of Bronze
 
-For 2024 we count 116 instances of Gold, 122 of Silver and 160 of Bronze
+For 2024 we count **116** instances of Gold, **122** of Silver and **160** of Bronze
 
 Hank Green then goes on to look at some past (Summer) Olympics and observes the same pattern in those
 
-:::{#cr-vid1}
-{{< video https://www.youtube.com/watch?v=kuvKukJNmzI width="500" height="350">}}
-Posted on 16th August 2024
+::: {#cr-vid1}
+{{< video https://www.youtube.com/watch?v=kuvKukJNmzI width="500" height="350">}} Posted on 16th August 2024
 :::
 :::
 
-:::{.cr-section}
-:::{focus-on="cr-vid2"}
+::: cr-section
+::: {focus-on="cr-vid2"}
 A few days later he released a follow-up on the video, sharing a supposed answer to this mystery he had received
 :::
 
@@ -45,35 +43,35 @@ Hank Green then normalizes the medal counts from the raw counts to percentages a
 
 He then concludes that there is no pattern and considers the matter settled
 
-Within this report here I will be looking into this matter a bit closer 
+Within this report here I will be looking into this matter a bit closer
 
-(Why? I am an unemployed statistician and thus in short supply of mysteries to tackle with my skills)
+*Why?*
 
-:::{#cr-vid2}
-{{< video https://www.youtube.com/watch?v=uL5HALThICw width="500" height="350">}}
-Posted on 19th August 2024
+*Because I have been unemployed for half a year as of creating this report and thus miss getting to do this kind of work*
+
+*([Here](https://www.linkedin.com/in/christoph-blapp-2659a11bb/) is my LinkedIn, by the way)*
+
+::: {#cr-vid2}
+{{< video https://www.youtube.com/watch?v=uL5HALThICw width="500" height="350">}} Posted on 19th August 2024
 :::
 :::
 
 ## The dataset
 
-I will be using a dataset I actually already have some familiarity with. Earlier this year a #TidyTuesday data visualization event used the [120 Years of Olympic History](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results) dataset, available on Kaggle and scraped from [sports-reference.com](https://www.sports-reference.com/). 
+I will be using a dataset I actually already have some familiarity with. Earlier this year a #TidyTuesday data visualization event used the [120 Years of Olympic History](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results) dataset, available on Kaggle and scraped from [sports-reference.com](https://www.sports-reference.com/).
 
 This dataset is missing Tokyo and Paris. I think that that's fine. Grabbing that data from elsewhere at a matching level of detail and integrating it into this dataset is something I could have done, but chose not to do because that flavor of work is a lot less fun than what I will be doing in the rest of this report.
 
 I will not look at Olympics from before the 2nd World War, despite them being included at a wonderful level of detail within the dataset. I will be focusing on visual methods and those do not get strictly better with more data points. Those older Olympics were also set in a distinctly different world with a clear justifiable break between them and the events I will be using.
 
-Let's also clear up another small matter here. My definition of Europe for the purposes of this report are the current and historic official members of *European Olympic Committees*, except for the Soviet Union and Russia. This notably also excludes the 1992 Unified Team which was a product of the dissolution process of the Soviet Union.
+Let's also clear up another small matter here. My definition of Europe for the purposes of this report are the current and historic official members of *European Olympic Committees*, except for the Soviet Union and Russia. This notably also excludes the 1992 Unified Team, which was a product of the dissolution process of the Soviet Union.
 
-```{r,echo=FALSE,message=FALSE,warning=FALSE,include=FALSE}
+```{r,echo=FALSE,include=FALSE}
 #laoding packages
 library(dplyr)
 library(ggplot2)
 library(tidytuesdayR)
-```
 
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE,include=FALSE,cache=TRUE}
 #load data and some prep
 data <- tidytuesdayR::tt_load('2024-08-06')
 data<-data$olympics
@@ -83,6 +81,7 @@ codes_EU<-"ALB,AND,ARM,AUT,AZE,BEL,BIH,BLR,BUL,CRO,CYP,CZE,DEN,ESP,EST,FIN,FRA,G
   strsplit(",")%>%
   unlist()
 
+#shared prep
 data_rel<-data%>%
   filter(grepl("Summer",games))%>%
   filter(year>=1948)%>%
@@ -102,30 +101,10 @@ data_rel<-data%>%
     bronze=sum(medal=="Bronze")/first(n_bronze)
   )%>%
   ungroup()
-```
 
-## The Original Pattern
+#first few figures
 
-:::{.cr-section}
-:::{focus-on="cr-a1"}
-Let's now look at the percentages among all medals gained by Europe throughout our data
-:::
-
-The golden line represents Gold Medals, the silver line Silver Medals and the brown-ish line Bronze Medals
-
-We will stick to visual perception here and not try to set up some proper test for a difference
-
-Bronze no longer stands out. Its line looks pretty interchangeable with Silver, even if it often ends up higher
-
-Gold's line, however, consistently is lowest
-
-(Though the period between 1988 and 2000 stands out for breaking that pattern a bit)
-
-I would argue that Europe doesn't have a Bronze surplus, but a Gold deficit
-
-:::{#cr-a1}
-```{r,echo=FALSE,message=FALSE,warning=FALSE,cache=TRUE}
-data_rel%>%
+fig<-data_rel%>%
   group_by(eu,year)%>%
   summarize(
     across(gold:bronze,~sum(.x))
@@ -145,34 +124,17 @@ data_rel%>%
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0")
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))
-```
-:::
-:::
 
-# Theory 1: Is it a thing with Sums?
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 14,
+  filename = "green_bronze_images/fig_pattern.svg")
 
-Paraphrased from Hank: Maybe the big number of athletes generated by summing up all the European countries helps more with Bronze that with Gold, because Gold athletes often are generational outliers, while Bronze can be won more easily by lucky 'regular' athletes
-
-:::{.cr-section}
-
-This is actually a great intuition
-
-Sums in statistics can have some weird properties and if you notice some weird pattern, checking whether what you are seeing one of those #JustSumThings is a great place to start your investigations
-
-One good (and fun) way to check just that in our setting is to sum up some other arbitrary groups of countries
-
-:::{focus-on="cr-fighank"}
-Here is the figure from above for countries whose official Olympics label starts with H, A, N or K
-:::
-(As in the label where the states are Portugal is POR, China is CHN and South Africa is RSA)
-
-Here we see the kind of pattern we would expect from medal percentages over the years
-
-A mess with none of the lines particularly standing out
-
-:::{#cr-fighank}
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-data_rel%>%
+fig<-data_rel%>%
   filter(substr(noc,1,1)%in%c("H","A","N","K"))%>%
   group_by(year)%>%
   summarize(
@@ -192,20 +154,17 @@ data_rel%>%
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0")
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))
-```
-:::
-:::
 
-:::{.cr-section}
-:::{focus-on="cr-figabcd"}
-Here is it for countries with neither A, B, C, D or E in their Olympic label
-:::
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 14,
+  filename = "green_bronze_images/fig_hank.svg")
 
-Same as above, just a visual mess without structure
-
-:::{#cr-figabcd}
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-data_rel%>%
+fig<-data_rel%>%
   filter(!grepl("A",noc))%>%
   filter(!grepl("B",noc))%>%
   filter(!grepl("C",noc))%>%
@@ -229,28 +188,17 @@ data_rel%>%
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0")
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))
-```
-:::
-:::
 
-:::{.cr-section}
-:::{focus-on="cr-figorder"}
-This is the group of countries whose labels are in the correct alphabetical order
-:::
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 14,
+  filename = "green_bronze_images/fig_abcd.svg")
 
-(So Denmark with Den and Finland with FIN are included, but Sweden is not, because SWE should be ESW)
-
-Here we see an pattern over time, but not one between the medal levels
-
-Can you guess what country causes that recent peak?
-
-(The answers is China with its CHN)
-
-(And the fantastic performance at the start of our observed period is caused by the Nordic countries I used as example above having fantastic performances at those first post-war games)
-
-:::{#cr-figorder}
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-data_rel%>%
+fig<-data_rel%>%
   filter(substr(noc,1,1)<=substr(noc,2,2))%>%
   filter(substr(noc,2,2)<=substr(noc,3,3))%>%
   group_by(year)%>%
@@ -271,35 +219,17 @@ data_rel%>%
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0")
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))
-```
-:::
-:::
 
-:::{.cr-section}
-Finally, let's sum up the countries each year that only got a few medals
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 14,
+  filename = "green_bronze_images/fig_order.svg")
 
-(Specifically 2.5% or less of the medals of each year)
-
-This overlaps with one of the other theories of Hank Green in his original video
-
-He suggests that maybe small and/or poor countries who can only send few athletes will only invest resources into athletes that are outlier talents 
-
-Thus they would get more Gold than Bronze, explaining why Europe had so many "leftover" Bronze medals
-
-(Since Europe can afford to foster and send as many athletes as the rules allow)
-
-:::{focus-on="cr-figtiny"}
-Actually we see see the same pattern here as for Europe
-:::
-(Note that there is still plenty of Europe in this group, thanks to all its small countries)
-
-(Though there is still lots of Africa in here and even a very not-small like India shows up in some years)
-
-(It's also nice to see the pattern over time here. That the lines here are increasing means that the most successful countries aren't monopolizing victory as much as they did in the past.)
-
-:::{#cr-figtiny}
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-data_rel%>%
+fig<-data_rel%>%
   group_by(year)%>%
   filter((gold+bronze+silver)<0.025)%>%
   summarize(
@@ -311,7 +241,7 @@ data_rel%>%
     aes(x=year,y=value,col=name)
     )+
   geom_line()+
-  scale_y_continuous("Bounty of Countries with few Medals among all Medals",labels = scales::percent,minor_breaks = NULL)+
+  scale_y_continuous("Bounty of Countries with few Medals",labels = scales::percent,minor_breaks = NULL)+
   coord_cartesian(ylim = c(-0.01,0.31),expand = F,xlim = c(1946,2018))+
   scale_x_continuous(NULL,breaks = seq(1948,2016,by=4),minor_breaks = NULL)+
   theme(
@@ -319,45 +249,17 @@ data_rel%>%
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0")
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))
-```
-:::
-:::
 
-## Theory 2: The Show-Offs
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 14,
+  filename = "green_bronze_images/fig_tiny.svg")
 
-:::{.cr-section}
-
-There are multiple avenues towards arriving at the next theory we will be looking at
-
-For example, the short period where the pattern disappears for Europe overlaps with an interesting chunk of modern history
-
-One might also simply wonder what is actually left after Europe and small and/or poor countries both show our suspicious pattern
-
-Someone needs to be winning all these missing Gold medals and it's probably not Australia
-
-:::{focus-on="cr-figpowers"}
-Let's look at the world's recent great powers
-:::
-
-China shows a surplus of Gold in recent decades
-
-The Soviet Union shows a surplus of Gold across its entire existence with the exception of 64 and 68
-
-Just look at its crazy 1980 result where it "brought home" (The Soviet Union hosted these games) almost twice as much (by percentage) Gold as Bronze.
-
-Its successor then started of with a decent Gold surplus that tapered off quickly
-
-And the US has been on a Gold Surplus for almost our entire time range, though we can notice that the lines grow closer after it lost its big rival
-
-Thus I propose the following explanation for our original mystery:
-
-A great power wanting to show off can spend the resources to consistently catapult its talents towards Gold
-
-Thus the nations that do not belong in that category have to fight over a pool of medals that is weighted towards Silver and Bronze
-
-:::{#cr-figpowers}
-```{r}
-data_rel%>%
+fig<-data_rel%>%
   mutate(
     grouping=case_when(
       noc=="USA"~"USA",
@@ -395,24 +297,17 @@ data_rel%>%
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))+
   facet_grid(vars(grouping))
-```
-:::
-:::
 
-:::{.cr-section}
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 18,
+  filename = "green_bronze_images/fig_powers.svg")
 
-:::{focus-on="cr-figleftover"}
-In support of that theory, here is a repeat of our initial Europe figure with the percentages adjusted to represent that leftover pool after the Great Powers have taken their share
-:::
-
-Our pattern disappears
-
-This answer is actually a fairly interesting twist on the usual socioeconomic explanation
-
-Wealth helps you get medals, just look at how much general metal Europe brings home each year, but targeting specifically Gold seems to require a level of dedicated investment Europe balks at
-:::{#cr-figleftover}
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-data_rel%>%
+fig<-data_rel%>%
   filter(!noc%in%c("USA","CHN","RUS","URS","EUN"))%>%
   group_by(year)%>%
   mutate(across(gold:bronze,~.x/sum(.x)))%>%
@@ -435,31 +330,18 @@ data_rel%>%
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0")
     )+
   scale_color_manual(NULL,values=c(gold="#d6af36",silver="#a7a7a7",bronze="#a77044"))
-```
-:::
-:::
 
-## Bonus: What if its not the Great Powers throwing money at their athletes
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 14,
+  filename = "green_bronze_images/fig_leftovers.svg")
 
-:::{.cr-section}
+#The rest of the figures have less shared code. Thus code will follow a pattern of prep-figure-prep-etc
 
-motivation
-
-but how?
-
-Mechanism: Repeat winners
-
-reitre into celebritydom and enjoying life
-
-no reason to sacrifice anymore
-
-country as reason to continue
-:::{focus-on="cr-figafter"}
-What  happens after Gold
-:::
-More likely Gold than other medal
-:::{#cr-figafter}
-```{r,out.width='70%'}
 group_events<-data%>%#cannot be used for this anal
   filter(year>=1948)%>%
   filter(grepl("Summer",games))%>%
@@ -525,7 +407,7 @@ medal_repeats_gold_cleaned<-medal_repeats_gold%>%
     grouping=="Soviet Union"&period!="Modern Era"
   )
 
-medal_repeats_gold_cleaned%>%
+fig<-medal_repeats_gold_cleaned%>%
   mutate(
     legacy=status%>%factor(levels = c("Another Gold","Silver","Bronze", "More Appearances, but no Medals","Retirement (from Olympics)")),
     grouping=factor(grouping,levels=c("Europe","USA","Soviet Union","China")),
@@ -551,18 +433,16 @@ medal_repeats_gold_cleaned%>%
     )+
   guides(fill=guide_legend(nrow=2, byrow=TRUE))+
   scale_y_continuous(NULL,labels = scales::percent)
-  
-```
-:::
-:::
 
-:::{.cr-section}
-:::{focus-on="cr-figreverse"}
-Reverse and zoom in 
-:::
-History: More likely Gold than just participate
-:::{#cr-figreverse}
-```{r}
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 20,
+  filename = "green_bronze_images/fig_legacy.svg")
+
 two_years_of_interest<-data%>%#as in : the first year with a Gold
   filter(year%in%c(1976,2012))%>%
   filter(grepl("Summer",games))%>%
@@ -581,7 +461,7 @@ status_two_years<-data%>%
       any(medal=="Gold"&year<year_medal)~"Already won Gold",
       any(medal=="Silver"&year<year_medal)~"Previously won Silver",
       any(medal=="Bronze"&year<year_medal)~"Previously won Bronze",
-      TRUE~"No Medals in previous Appearances"
+      TRUE~"No previous Medals"
     )
   )%>%
   ungroup()
@@ -604,9 +484,9 @@ two_years_cleaned<-status_two_years%>%
     grouping=="Soviet Union"&year==1976
   )
 
-two_years_cleaned%>%
+fig<-two_years_cleaned%>%
   mutate(
-    legacy=status%>%factor(levels = c("Already won Gold","Previously won Silver","Previously won Bronze", "No Medals in previous Appearances","First Olympics")),
+    legacy=status%>%factor(levels = c("Already won Gold","Previously won Silver","Previously won Bronze", "No previous Medals","First Olympics")),
     grouping=factor(grouping,levels=c("Europe","USA","Soviet Union","China"))
   )%>%
   group_by(grouping,year)%>%
@@ -622,28 +502,23 @@ two_years_cleaned%>%
   theme_minimal()+
   scale_x_discrete(NULL,breaks=NULL)+
   scale_fill_manual("Who wins Gold?\n(Highest previous Result)",values=c(
-    "First Olympics"="pink2","No Medals in previous Appearances"="green3","Previously won Silver"="#a7a7a7", "Previously won Bronze"="#a77044","Already won Gold"="#d6af36"
+    "First Olympics"="pink2","No previous Medals"="green3","Previously won Silver"="#a7a7a7", "Previously won Bronze"="#a77044","Already won Gold"="#d6af36"
   ))+  
   theme(
     legend.position = "bottom", plot.background=element_rect(fill="#FFFFE0")
     )+
   guides(fill=guide_legend(nrow=2, byrow=TRUE))+
   scale_y_continuous(NULL,labels = scales::percent)
-```
-:::
-:::
 
-:::{.cr-section}
-:::{focus-on="cr-figbigger"}
-full picture
-:::
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 16,
+  filename = "green_bronze_images/fig_reverse.svg")
 
-To repeat, this graphic does not include all of the team events, since tracking athletes there gets more convoluted
-
-no medal group seems prone to bronze of gold and is most populous in europe
-
-:::{#cr-figbigger}
-```{r}
 two_years_of_interest_all<-data%>%
   filter(year%in%c(1976,2012))%>%
   filter(grepl("Summer",games))%>%
@@ -669,7 +544,7 @@ status_two_years_all<-data%>%
       any(medal=="Gold"&year<year_medal)~"Previously won Gold",
       any(medal=="Silver"&year<year_medal)~"Previously won Silver",
       any(medal=="Bronze"&year<year_medal)~"Previously won Bronze",
-      TRUE~"No Medals in previous Appearances"
+      TRUE~"No previous Medals"
     )
   )%>%
   ungroup()
@@ -695,12 +570,12 @@ two_years_cleaned_all<-status_two_years_all%>%
     grouping=="Soviet Union"&year==1976
   )%>%
   mutate(
-    legacy=status%>%factor(levels = c("Previously won Gold","Previously won Silver","Previously won Bronze", "No Medals in previous Appearances","First Olympics")),
+    legacy=status%>%factor(levels = c("Previously won Gold","Previously won Silver","Previously won Bronze", "No previous Medals","First Olympics")),
     grouping=factor(grouping,levels=c("Europe","USA","Soviet Union","China")),
     medal=factor(medal,levels=c("Gold","Silver","Bronze","None"))
   )
 
-two_years_cleaned_all%>%
+fig<-two_years_cleaned_all%>%
   ggplot(aes(y=legacy,x=medal,col=medal))+
   geom_jitter(height=0.35,width=0.35)+
   facet_grid(cols=vars(grouping),rows=vars(year))+
@@ -711,7 +586,8 @@ two_years_cleaned_all%>%
   ))+  
   theme(
     legend.position = "none", plot.background=element_rect(fill="#FFFFE0"),
-    panel.background= element_rect(fill=NA,color="black")
+    panel.background= element_rect(fill=NA,color="black"),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
     )+
   scale_y_discrete(NULL)+
   geom_label(
@@ -720,6 +596,218 @@ two_years_cleaned_all%>%
       summarize(label=n(),.groups="drop"),
     aes(label=label,col="black")
   )
+
+ggsave(
+  plot = fig,
+  device = "svg",
+  dpi=300,
+  units = "cm",
+  width = 22,
+  height = 22,
+  filename = "green_bronze_images/fig_bigger.svg")
 ```
+
+## The Original Pattern
+
+::: cr-section
+::: {focus-on="cr-pattern"}
+Let's now look at the percentages among all medals gained by Europe throughout our data
 :::
+
+The golden line represents Gold Medals, the silver line Silver Medals and the brown-ish line Bronze Medals
+
+We will stick to visual perception here and not try to set up some proper test for a difference
+
+Bronze no longer stands out. Its line looks pretty interchangeable with Silver, even if it often ends up higher
+
+Gold's line, however, consistently is lowest
+
+(Though the period between 1988 and 2000 stands out for breaking that pattern a bit)
+
+I would argue that Europe doesn't have a Bronze surplus, but a Gold deficit
+
+::: {#cr-pattern}
+![](green_bronze_images/fig_pattern.svg){width=90%}
+:::
+:::
+# Theory 1: Is it a thing with Sums?
+
+Paraphrased from Hank: Maybe the big number of athletes generated by summing up all the European countries helps more with Bronze that with Gold, because Gold athletes often are generational outliers, while Bronze can be won more easily by lucky 'regular' athletes
+
+::: cr-section
+This is actually a great intuition
+
+Sums in statistics can have some weird properties and if you notice some weird pattern, checking whether what you are seeing one of those #JustSumThings is a great place to start your investigations
+
+One good (and fun) way to check just that in our setting is to sum up some other arbitrary groups of countries
+
+::: {focus-on="cr-hank"}
+Here is the figure from above for countries whose official Olympics label starts with H, A, N or K
+:::
+
+(As in the label where the states are Portugal is POR, China is CHN and South Africa is RSA)
+
+Here we see the kind of pattern we would expect from medal percentages over the years
+
+A mess with none of the lines particularly standing out
+
+::: {#cr-hank}
+![](green_bronze_images/fig_hank.svg){width=90%}
+:::
+
+::: {focus-on="cr-abcd"}
+Here is it for countries with neither A, B, C, D or E in their Olympic label
+:::
+
+Same as above, just a visual mess without structure
+
+(You can actually pick out the downfall of the Soviet Union in this figure)
+
+::: {#cr-abcd}
+![](green_bronze_images/fig_abcd.svg){width=90%}
+:::
+
+::: {focus-on="cr-order"}
+This is the group of countries whose labels are in the correct alphabetical order
+:::
+
+(So Denmark with Den and Finland with FIN are included, but Sweden is not, because SWE should be ESW)
+
+Here we see an pattern over time, but not one between the medal levels
+
+Can you guess what country causes that recent peak?
+
+(The answers is China with its CHN)
+
+(And the fantastic performance at the start of our observed period is caused by the Nordic countries I used as example above having fantastic performances at those first post-war games)
+
+::: {#cr-order}
+![](green_bronze_images/fig_order.svg){width=90%}
+:::
+
+Finally, let's sum up the countries each year that only got a few medals
+
+(Specifically 2.5% or less of the medals of each year)
+
+This overlaps with one of the other theories of Hank Green in his original video
+
+He suggests that maybe small and/or poor countries who can only send few athletes will only invest resources into athletes that are outlier talents
+
+Thus they would get more Gold than Bronze, explaining why Europe had so many "leftover" Bronze medals
+
+(Since Europe can afford to foster and send as many athletes as the rules allow)
+
+::: {focus-on="cr-tiny"}
+Actually we see see the same pattern here as for Europe
+:::
+
+(Note that there is still plenty of Europe in this group, thanks to all its small countries)
+
+(Though there is still lots of Africa in here and even a very not-small like India shows up in some years)
+
+(It's also nice to see the pattern over time here. That the lines here are increasing means that the most successful countries aren't monopolizing victory as much as they did in the past.)
+
+::: {#cr-tiny}
+![](green_bronze_images/fig_tiny.svg){width=90%}
+:::
+:::
+
+## Theory 2: The Show-Offs
+
+::: cr-section
+There are multiple avenues towards arriving at the next theory we will be looking at
+
+For example, the short period where the pattern disappears for Europe overlaps with an interesting chunk of modern history
+
+One might also simply wonder what is actually left after Europe and small and/or poor countries both show our suspicious pattern
+
+Someone needs to be winning all these missing Gold medals and it's probably not Australia
+
+::: {focus-on="cr-powers"}
+Let's look at the world's recent great powers
+:::
+
+China shows a surplus of Gold in recent decades
+
+The Soviet Union shows a surplus of Gold across its entire existence with the exception of 64 and 68
+
+Just look at its crazy results in 1972 and 1980 where it "brought home" (The Soviet Union hosted one these games) around twice as much (by percentage) Gold as Bronze.
+
+Its successor then started of with a decent Gold surplus that tapered off quickly
+
+And the US has been on a Gold Surplus for almost our entire time range, though we can notice that the lines grow closer after it lost its big rival
+
+Thus I propose the following explanation for our original mystery:
+
+A great power wanting to show off can spend the resources to consistently catapult its talents towards Gold
+
+Thus the nations that do not belong in that category have to fight over a pool of medals that is weighted towards Silver and Bronze
+
+::: {#cr-powers}
+![](green_bronze_images/fig_powers.svg){width=90%}
+:::
+
+
+::: {focus-on="cr-leftover"}
+In support of that theory, here is a repeat of our initial Europe figure with the percentages adjusted to represent that leftover pool after the Great Powers have taken their share
+:::
+
+Our pattern disappears
+
+This answer is actually a fairly interesting twist on the usual socioeconomic explanation
+
+Wealth helps you get medals, just look at how much general metal Europe brings home each year, but targeting specifically Gold seems to require a level of dedicated investment Europe balks at 
+
+:::{#cr-leftover}
+![](green_bronze_images/fig_leftovers.svg){width=90%}
+:::
+:::
+
+## Bonus: What if its not the Great Powers throwing money at their athletes
+
+::: cr-section
+motivation
+
+but how?
+
+Mechanism: Repeat winners
+
+reitre into celebritydom and enjoying life
+
+no reason to sacrifice anymore
+
+country as reason to continue 
+
+:::{focus-on="cr-after"} 
+What happens after Gold
+:::
+More likely Gold than other medal 
+
+:::{#cr-after}
+![](green_bronze_images/fig_legacy.svg){width=90%}
+::: 
+
+::: {focus-on="cr-reverse"}
+Reverse and zoom in
+:::
+
+History: More likely Gold than just participate 
+
+:::{#cr-reverse}
+![](green_bronze_images/fig_reverse.svg){width=90%}
+:::
+
+
+::: {focus-on="cr-figbigger"}
+full picture
+:::
+
+To repeat, this graphic does not include all of the team events, since tracking athletes there gets more convoluted
+
+no medal group seems prone to bronze of gold and is most populous in europe
+
+::: {#cr-figbigger}
+![](green_bronze_images/fig_bigger.svg){width=90%}
+:::
+
 :::
