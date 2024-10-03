@@ -10,16 +10,16 @@ editor: visual
 
 
 ::: cr-section
-# The Start of our Story
+## The Start of our Story
 
 ::: {focus-on="cr-vid1"}
 Some weeks ago, right after the Paris Olympics had concluded, an influencer whose content I quite enjoy - Hank Green - released a video
 :::
 
-Within the video he describes an interesting pattern he had noticed while looking at medal tables that summarize Europe's many countries into a single entry
+Within the video he described an interesting pattern he had noticed while looking at medal tables that summarize Europe's many countries into a single entry
 
-This European sum seems to have an over-representation of Bronze. 
-
+This European sum seems to have an over-representation of Bronze\
+\
 For 2024 we count 116 instances of Gold, 122 of Silver and **160** of Bronze
 
 Hank Green then goes on to look at some past (Summer) Olympics and observes the same pattern in those
@@ -36,14 +36,14 @@ A few days later he released a follow-up on the video, sharing a supposed answer
 
 It's simple. Comparing the raw numbers of Bronze and the other medals is inherently flawed
 
-Events (almost) always only hand out a single Silver or Gold, but not all only hand out a single Bronze medal
+Events (almost) always only hand out a single Silver or Gold, but not all only hand out a single Bronze medal \
+\
+Example: Judo, which uses a tournament structure but has no match to settle placements between the two losers from the semi-finals. They simply consider them to be tied for 3rd place and thus hand out Bronze to either athlete
 
-Example: Judo, which uses a tournament structure but has no match to settle placements between the two losers from the semi-finals
-They simply consider them to be tied for 3rd place and thus hand out Bronze to either athlete
-
-Hank Green then normalizes the medal counts from raw counts to percentages and the pattern he observes weakens.
-
-For 2024 we calculate a European share of 35.2% among Gold, 36.9% among Silver and 41.5% among Bronze
+Hank Green then normalizes the medals from raw counts to percentages and the pattern he observes weakens\
+\
+For 2024 we calculate a European share of 35.2% among Gold, 36.9% among Silver and 41.5% among Bronze \
+\
 (And an even smaller difference for previous years)
 
 He then concludes that there is no pattern and considers the matter settled
@@ -52,24 +52,24 @@ Within this report here I will be looking into this matter a bit closer
 
 *Why?*
 
-*Because I have been unemployed for half a year as of creating this report and thus miss getting to do this kind of detective work with data*
-
-*([Here](https://www.linkedin.com/in/christoph-blapp-2659a11bb/) is my LinkedIn, by the way. Maybe someone reading this has a need for my skills)*
+*Because I have been unemployed for half a year ,as of the creation of this report, and thus miss getting to do this kind of detective work with data*\
+\
+*([Here](https://www.linkedin.com/in/christoph-blapp-2659a11bb/) is my LinkedIn, by the way)*
 
 ::: {#cr-vid2 .scale-to-fill}
 {{< video https://www.youtube.com/watch?v=uL5HALThICw width="500" height="350">}} Posted on 19th August 2024
 :::
 :::
 
-## The Dataset
+## The Dataset (Boring and Skippable)
 
-I will be using a dataset I actually already have some familiarity with. Earlier this year a #TidyTuesday data visualization event used the [120 Years of Olympic History](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results) dataset, available on Kaggle and scraped from [sports-reference.com](https://www.sports-reference.com/).
+I will be using a dataset I already have some familiarity with. Earlier this year a #TidyTuesday data visualization event used the [120 Years of Olympic History](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results) dataset, available on Kaggle and scraped from [sports-reference.com](https://www.sports-reference.com/).
 
 This dataset is missing Tokyo and Paris. I think that that's fine. Grabbing that data from elsewhere at a matching level of detail and integrating it into this dataset is something I could have done, but chose not to do because that flavor of work is a lot less fun than what I will be doing in the rest of this report.
 
-I will not look at Olympics from before the 2nd World War, despite them being included at a wonderful level of detail within the dataset. This story is focusing on visual methods, and those do not get strictly better with more data points. Those older Olympics were set in a distinctly different world and the break the Olympics took during the war offers a wonderful, unambiguous cut to split the data on.
+I will not look at Olympics from before the 2nd World War, despite them being included at a wonderful level of detail within the dataset. This little story will be focusing on visual methods, and those do not get strictly better with more data points. Those older Olympics were set in a distinctly different world and the break the Olympics took during the war offers a wonderful, unambiguous cut to split the data on.
 
-Let's also clear up another small matter here. My definition of Europe for the purposes of this report are the current and historic official members of the *European Olympic Committees*, except for the Soviet Union and Russia. This also excludes the 1992 Unified Team, which was a product of the dissolution process of the Soviet Union.
+Let's also clear up another small matter here. My definition of Europe for the purposes of this report are the current and historic official members of the *European Olympic Committees*, except for the Soviet Union and Russia.
 
 ```{r,echo=FALSE,include=FALSE}
 #laoding packages
@@ -623,16 +623,16 @@ fig_interactive<-fig_interactive%>%
 ## The Original Pattern
 
 ::: {focus-on="cr-pattern"}
-First, let's look at the percentages among all medals gained by Europe throughout our data
+First, let's look at these percentages among all medals mentioned above throughout our data
 :::
 
-The golden line represents Gold Medals, the silver line Silver Medals and the brown-ish line Bronze Medals
+The golden line represents Gold medals, the silver line Silver medals and the brown-ish line Bronze medals
 
-We will stick to visual perception here and not try to set up some proper test statistic for a difference
-
-Bronze no longer stands out. Its line looks pretty interchangeable with Silver
-
-Gold's line, however, consistently is lowest
+We will stick to visual perception here and not try to set up some proper test statistic for a difference \
+\
+Bronze no longer stands out. Its line looks pretty interchangeable with Silver \
+\
+Gold's line, however, is consistently the lowest
 
 (Though the period between 1988 and 2000 stands out for breaking that pattern a bit)
 
@@ -644,7 +644,9 @@ I would thus argue that Europe doesn't have a Bronze surplus, but a Gold deficit
 
 ## Theory 1: Is it a Sums thing?
 
-Paraphrased from Hank: Maybe the big number of athletes generated by summing up all the European countries helps more with Bronze that with Gold. Gold athletes often are generational outliers, while Bronze can be won more easily by lucky """regular""" Olympics-level athletes
+Paraphrased from Hank Green: \
+Maybe the big number of athletes generated by summing up all the European countries helps more with Bronze than with Gold.\
+Gold athletes often are special generational outliers, while Bronze could be something that a group of nations can guarantee for itself just by sending enough athletes
 
 This is actually a great intuition
 
@@ -653,10 +655,10 @@ Sums in statistics can have some weird properties. If you notice some weird patt
 One good (and fun) way to check just that in our setting is to sum up some other arbitrary groups of countries
 
 ::: {focus-on="cr-hank"}
-Here is the figure from above for countries whose official Olympics label starts with H, A, N or K
+Here is the figure from above for countries whose official Olympics label starts with H, A, N or K\
+\
+(Examples: Hungary is HUN, Argentina is ARG and Saudi Arabia is KSA)
 :::
-
-(As in the official Olympic labels. Examples: Portugal is POR, China is CHN and South Africa is RSA)
 
 Here we see the kind of pattern we would expect from medal percentages over the years
 
@@ -667,56 +669,51 @@ A turbulent mess with none of the lines particularly standing out
 :::
 
 ::: {focus-on="cr-abcd"}
-Here is it for countries with neither A, B, C, D or E in their Olympic label
+Here is the same for countries with neither A, B, C, D or E in their Olympic label
 :::
 
 Same as above, just a visual mess without structure
-
-(You can actually pick out the downfall of the Soviet Union (URS) in this figure)
 
 ::: {#cr-abcd .scale-to-fill}
 ![](green_bronze_images/fig_abcd.png){width=90%}
 :::
 
 ::: {focus-on="cr-order"}
-This is the group of countries whose labels are in the correct alphabetical order
+This is the group of countries whose labels are in the correct alphabetical order \
+\
+(So Denmark with DEN and Finland with FIN are included, but Sweden is not, because SWE should be ESW)
 :::
 
-(So Denmark with DEN and Finland with FIN are included, but Sweden is not, because SWE should be ESW)
-
-Here we see an pattern over time, but not one between the medal levels
+Here we see a pattern over time, but not one between the medal levels
 
 Can you guess what country causes that recent peak?
 
 (The answers is China with its CHN)
 
-(And the bump in performance at the very start of our observed period is caused by the Nordic countries I used as example above having fantastic performances at those first post-war games)
-
 ::: {#cr-order .scale-to-fill}
 ![](green_bronze_images/fig_order.png){width=90%}
 :::
 
-Finally, let's sum up the countries each year that only got a few medals
-
+Next we will sum up the countries each year that only got a few medals\
+\
 (Specifically 2.5% or less of the medals of each year)
 
-This overlaps with one of the other theories of Hank Green in his original video
+This actually broadly overlaps with one of the other speculations of Hank Green in his original video
 
-He suggests that maybe small and/or poor countries, who can only afford to support a few athletes for each game, will only invest resources into athletes that are outlier talents
-
-Thus they would get more Gold than Bronze, explaining why Europe had so many "leftover" Bronze medals
-
-(Since Europe can afford to foster and send as many athletes as the rules allow)
+He suggests that maybe small and/or poor countries, who can only afford to support a few athletes for each game, will only invest resources into athletes which are outlier talents destined for Gold \
+\
+Europe, however, can afford to support a broader base of athletes\
+\
+So Europe would be represented among the outlier talents at a rate matching their population, while being over-represented among the """average""" Olympic-level athletes 
 
 ::: {focus-on="cr-tiny"}
-Surprisingly, we see see the same pattern here as for Europe
+Contrary to that theory, we see see the same pattern here as for Europe
 :::
 
-(Note that there is still plenty of Europe in this group, thanks to all its small countries)
+(Note that this doesn't fully match a grouping by wealth. All the small European countries also show up in here. Africa is plentiful, however, and even a huge country like India shows up in many years years, even in **2016**. \
+Properly creating a subset of poor countries would have both required grabbing additional external data and been pretty awkward throughout time. Just think of the economic journey South Korea went on between fifties and our current century)
 
-(Though Africa is also in here and even a huge country like India shows up in plenty of years years)
-
-(It's also nice to see the pattern over time here. That the lines here are increasing, means that the most successful countries aren't monopolizing victory as much as they did in the past.)
+There is a neat pattern throughout time here, though. That the lines here are increasing, means that overall the most successful countries aren't monopolizing victory as much as they did in the past
 
 ::: {#cr-tiny .scale-to-fill}
 ![](green_bronze_images/fig_tiny.png){width=90%}
@@ -726,11 +723,11 @@ Surprisingly, we see see the same pattern here as for Europe
 
 There are multiple avenues towards arriving at the next theory we will be looking at
 
-For example, the short period where the pattern disappears for Europe overlaps with an interesting chunk of modern history
-
-One might also simply wonder what is actually left after Europe and small and/or poor countries both show our suspicious pattern
-
-Someone needs to be winning all these missing Gold medals and it's probably not Australia
+For example, the short period where the pattern disappears for Europe overlaps with an interesting chunk of modern history \
+\
+One might also simply wonder what is actually left after Europe and small and/or poor countries both show our suspicious pattern \
+\
+And all that Gold needs to go somewhere and there are certain countries we associate with being *good at Olympics*
 
 ::: {focus-on="cr-powers"}
 Let's thus now look at the world's recent great powers. Do you notice something?
@@ -738,16 +735,15 @@ Let's thus now look at the world's recent great powers. Do you notice something?
 
 China shows a surplus of Gold in recent decades 
 
-The Soviet Union shows a surplus of Gold across its entire existence with the curious exception of 64 and 68. Furthermore, look at its crazy results in 1972 and 1980 where it won around twice as much (by percentage) Gold as Bronze.
-
+The Soviet Union shows a surplus of Gold across its entire existence with the curious exception of 64 and 68. Furthermore, look at its crazy results in 1972 and 1980 where it won around twice as much (by percentage) Gold as Bronze. \
+\
 Its successor then started of with a decent Gold surplus that tapered off quickly
 
-The US has been on a Gold Surplus for almost the entire time range, though we can notice that the lines grow closer after it lost its big rival. Though at the end, after China starts to make its mark, the gap seems to open up again
+The US has been on a Gold Surplus for almost the entire time range, though it seems a bit as if lines grow closer after it lost its big rival
 
-Thus I propose the following explanation for our original mystery:
-
-A great power wanting to show off can *somehow* consistently catapult its talents towards Gold. It's as if they had some privilege of getting pick their medals first
-
+Thus I propose the following explanation for our original mystery: \
+A great power wanting to show off can *somehow* consistently catapult its talents towards Gold. And if they win Gold, other countries cannot\
+\
 Thus the nations that do not belong in that category have to fight over a pool of leftover medals that is weighted towards Silver and Bronze
 
 ::: {#cr-powers .scale-to-fill}
@@ -757,83 +753,116 @@ Thus the nations that do not belong in that category have to fight over a pool o
 Now, we are *already* adjusting our visualizations to a medal pool with where the medal numbers are uneven 
 
 ::: {focus-on="cr-leftover"}
-So here is a repeat of our initial Europe figure, where use the percentages to also adjust for the medals gobbled up by the great powers. These are the percentages among those """leftover medals"""
+So here is a repeat of our initial Europe figure, where use the percentages to also adjust for the medals gobbled up by the great powers. These are the percentages among those leftover medals
 :::
 
 Our pattern disappears
 
-There is also an obvious candidate for that mysterious *somehow* that great powers wanting to show-off have, but other countries lack.
+There is also an obvious candidate for that mysterious *somehow* that great powers wanting to show-off have, but other countries lack
 
-It's actually an interesting twist on your usual socioeconomic explanations. Being wealthy in a general sense and letting that money trickle into sports is neat and definitely a big advantage, but a nation that considers the Olympics a vital battlefield in its global struggle for prestige and soft power is incentivized to invest at a higher level
+It's actually an interesting twist on your usual socioeconomic explanations. Being wealthy in a general sense, and letting that money trickle into sports, is neat and definitely a big advantage, but a nation that considers the Olympics a vital battlefield in its global struggle for prestige and soft power is incentivized to invest at a higher level
 
 I propose that this probable higher investment causes the pattern that we observe
 
-*(There is probably some source out there I could use to verify the assumption that the great powers have a higher Olympics budget, but hunting it down is outside my specialty and doesn't sound fun)*
+*(There is probably some source out there I could use to verify the assumption that the great powers have a higher Olympics budget, but hunting that down is outside my specialty and doesn't sound fun)*
 
 :::{#cr-leftover .scale-to-fill}
 ![](green_bronze_images/fig_leftovers.png){width=90%}
 :::
 :::
 
-# Bonus: Let's check an alternate explanation
+## Bonus: Let's check an alternate explanation
 
 ::: cr-section
-We could stop here, but so far I have just recycled a single figure a couple of times and that's boring. 
+We could stop here, but so far I have just recycled a single figure a couple of times and that's boring\
+\
+Thus I will now do some more visualizations to check a different theory for the advantage we observe among the great powers\
+\
+What else could differentiate their athletes from the rest of the world?
 
-Thus I will now do some more visualizations to check a non-socioeconomic theory for the advantage we observe among the great powers. What else could differentiate their athletes from the rest of the world? \
-Many things, but what I want to look at is whether the very fact *that* they are collectively competing for the top spot on the medal tables has an impact on the career trajectories of the individual athletes.
+Many things, but what I want to look at is whether the very fact *that* they are collectively competing for the top spot on the medal tables has an impact on the career trajectories of the individual athletes
 
-For the average athlete winning a Gold is probably a moment where you reevaluate your life plans. Your have reached the peak and entered the annals of your sport. You cannot go farther than Gold. Should you really continue this challenging athlete's life for a chance at mere tie to the victory you just experienced?\
-Someone from a country fighting for the overall top is part of something bigger. Every athlete is competing for both themselves and their country, but that second part is a lot more ephemeral when collectively ranking 30th counts as a success.\
-So it seems reasonable to speculate that athletes from great powers are more likely to not rest on their laurels, because they consider themselves part of a struggle that's bigger than them.
+For the average athlete winning a Gold is probably a moment where you reevaluate your life\
+\
+You have reached the peak and entered the annals of your sport \
+\
+You cannot go farther than Gold \
+\
+Should you really continue this challenging athlete's life for a chance at mere tie to the victory you just experienced?
 
-And it's also very reasonable to assume that athletes that won once and then continued their training would be future favorites for Gold, right?
+Someone from a country fighting for the overall top is part of something bigger \
+\
+Obviously every athlete is competing for both themselves and their country, but that second part is a lot more ephemeral when collectively ranking 30th counts as a success \
+\
+So it seems reasonable to speculate that athletes from great powers are more likely to not rest on their laurels, because they consider themselves part of a struggle that's bigger than them
 
-(There is also an economic layer. Bringing a country like Poland or Spain one of its few Gold medals will temporarily make you one of that nation's most famous people, and thus one of its most valuable toothpaste/insurance/shoe salespeople, even if you won Shot Put or some arcane form of swimming. \
-The Great Powers, however, have enough winners that companies get to be picky when it comes to putting faces on their billboards)
+And it's also very reasonable to assume that athletes that won once and then continued their training would be future favorites for Gold, *right*?
+
+(There is also an economic layer even to this theory. \
+Bringing a country like Poland or Spain one of its few Gold medals will temporarily make you one of that nation's most famous people, and thus one of its most valuable toothpaste/insurance/shoe salespeople, even if you won Shot Put or some arcane form of swimming. \
+The Great Powers, however, have enough winners that companies get to be picky when it comes to putting faces on their billboards. \
+Thus their athletes would not be busy taking advantage of their unique ooprtunity to actually monetize their career.)
 
 :::{focus-on="cr-after"} 
-Let us thus look at a figure of what happens after an Athlete wins Gold
+Let us thus look at a figure of what happens after an athlete wins Gold \
+\
+Instead of looking at each game separately, which would get too messy when looking at five categories simultaneously, I created these three rough periods. For each champion we look at their earliest Gold medal and match them into a period based on the year of that victory
 :::
 
-Every part of my theory was wrong...
+Every part of my theory was apparently wrong...\
+\
+(Some implementation details: \
+The data here excludes all team competitions because tracking an entire team is hard. Furthermore, we treat athletes participating in multiple events as multiple people. So 'Simone Floor Biles' would be distinct from 'Simone Vault Biles')
 
-(Some implementation details: The data here excludes all team competitions because tracking an entire team is hard. We also treat athletes participating in multiple events as multiple people. So 'Floor Simone Biles' would be distinct from 'Vault Simone Biles', though she is a bit too young to show up in the 2012 figure.)
+Europeans athletes *more* often show up for another go after their victory and champions don't seem that much like the favorites, especially during the Cold War \
+\
+I am actually not sure where I would personally put the cutoff for being a *favorite*, but even the slightly below 1-in-5 odds we see for modern doesn't represent a reliable bet towards further victory
 
-Europeans athletes are *more* like to show up for another go after their victory
-
-Our champions also don't seem that much like the favorites, especially in the upper half of the figure
-
-The difference between *Modern Era* and *Cold War* is actually pretty striking. Olympic retirement is still the top result from each group in current times, but it's lead has shrunk by a lot compared to th earlier times
+It's tangential to my actual theory, but the difference between *Modern Era* and *Cold War* is actually pretty striking. Olympic retirement is still the top result for each group in current times, but its lead has shrunk by a lot compared to the two earlier periods \
+\
+Those 80% numbers for never returning to the Olympics after a victory sure are bleak, especially considering the state-mandated drug abuse during that era
 
 :::{#cr-after .scale-to-fill}
 ![](green_bronze_images/fig_legacy.png){width=90%}
 ::: 
 
 ::: {focus-on="cr-reverse"}
-Let's reverse the direction and see what the background of the athletes actually winning Gold are. We will zoom in on two specific Olympics for this.
+Who's winning Gold, though, when it's not former champions? \
+\
+Let's reverse the direction and see what the background of the athletes actually winning Gold are\
+\
+(We zoom in on two specific Olympics for this, to dodge some complicated stuff in the background calculations)
 :::
 
-Most Gold medals seem to be going to athletes participating for the first time, especially during the Cold War
+Most Gold medals seem to be going to athletes participating for the first time, especially during the Cold War \
+\
+2012 Europe stands out for having a pretty hefty chunk of its Gold won 
+by people who previously participated without landing on the podium \
+\
+The 2012 US and 2012 China *do* have former medalist as relatively major drives for Gold  
 
-This support the initial explanation about the Great Powers getting Gold by spending lots of money. 
-
-A great athlete from Europe can stick around because that country probably won't have that many world class athletes for that specific disciplines, but in the GPs there are is a next generation already lined up just waiting for their one shot
+We also gain see a picture that's very different between our two snapshot, which makes me lean towards just ending this chapter with an *It's complicated* \
+\
+We can discard my alternate theory for 1976 due to the sky high newcomer numbers there, but it could still be plausible for 2012
 
 :::{#cr-reverse .scale-to-fill}
 ![](green_bronze_images/fig_reverse.png){width=90%}
 :::
 :::
 
-Finally, let's go for something that's exciting and clumsily big
+\
+\
+\
+\
+Finally, let's go for something that's exciting and big and a bit clumsy. Let's adjust the above figure to represent a fuller picture of these two Olympics.
 
 (Warning: this part might look bad on some screen and browser setups)
 
-Here we put what we already looked at on the Y-axis and add all the other possible results on the X-axis. Note that we are looking at raw medals, rather than percentages, and thus we are back to being unable to compare Bronze counts to the other medals, I would also like to repeat another time that this chapter has removed all team events.
+Here we put what we already looked at on the Y-axis, and add all the other possible results on the X-axis. Note that we are looking at raw medals, rather than percentages, and thus we are back to being unable to compare Bronze counts to the other medals. I would also like to repeat another time that I needed to remove all team events for these last few figures.
 
 With this many numbers the figure turns into a bit of a Choose-Your-Own-Adventure, though. It's hard to pick which numbers you should be comparing.
 
-But I believe that it's important to end this journey on the raw result, rather than the percentages. It's important to remember what we are looking at here. Any athlete of these deserves to be treated as a story rather than a statistic. So here is a big, clumsy interactive figure where you can hover over points to see the corresponding names.
+But I believe that it's actually a good thing to end this journey on the raw result, rather than the percentages. It's important to remember what we are looking at here. Any athlete who made it into this data deserves to be treated as a story as well as a statistic. So here is a big, clumsy interactive figure where you can hover over points to see the person behind that result.
 
 Go find some names you know and learn some new ones!
 
